@@ -1,4 +1,4 @@
-import Html exposing (Html, div, text, button, input)
+import Html exposing (Html, div, text, button, input, ul, li)
 import Html.Events exposing (onClick, onInput)
 import Time exposing (Time, every, second)
 import Maybe exposing (withDefault)
@@ -60,15 +60,20 @@ view model =
     in
         div []
         [ button [onClick (Add timer)] [text "ADD"]
-        , withDefault (text "missing list") (List.head (List.map (\timer -> viewTimer timer) model.timers))
+        , viewTimerList model
         ]
 
-viewTimer : Timer -> Html Msg
-viewTimer timer =
-    div []
-    [ button [] [text "START"]
-    , button [] [text "RESET"]
-    , timer.name
-        |> withDefault "no name set"
-        |> text
-    ]
+viewTimerList : Model -> Html Msg
+viewTimerList model =
+    let
+        viewTimer timer =
+            li [] 
+            [ button [] [text "START"]
+            , button [] [text "RESET"]
+            , timer.name
+                |> withDefault "timer has no name"
+                |> text
+            ]
+        timers = List.map viewTimer model.timers
+    in
+        ul [] timers
