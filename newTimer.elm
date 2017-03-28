@@ -51,4 +51,24 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div [] [button [onClick Add  [text "Button"]]
+    let
+        timer = 
+            { time = 0
+            , counting = False
+            , name = Just "name"
+            }
+    in
+        div []
+        [ button [onClick (Add timer)] [text "ADD"]
+        , withDefault (text "missing list") (List.head (List.map (\timer -> viewTimer timer) model.timers))
+        ]
+
+viewTimer : Timer -> Html Msg
+viewTimer timer =
+    div []
+    [ button [] [text "START"]
+    , button [] [text "RESET"]
+    , timer.name
+        |> withDefault "no name set"
+        |> text
+    ]
