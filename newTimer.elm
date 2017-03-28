@@ -1,5 +1,6 @@
 import Html exposing (Html, div, text, button, input, ul, li)
 import Html.Events exposing (onClick, onInput)
+import Html.Attributes exposing (type_, value)
 import Time exposing (Time, every, second)
 import Maybe exposing (withDefault)
 
@@ -15,6 +16,7 @@ main =
 
 type alias Model =
     { timers : List Timer
+    , input : String
     }
 
 type alias Timer =
@@ -27,18 +29,35 @@ type alias Timer =
 
 init : (Model, Cmd Msg)
 init =
-    ({ timers = [] } , Cmd.none)
+    ( { timers = []
+      , input = ""
+      }
+    , Cmd.none
+    )
 
 -- UPDATE
 
 type Msg
     = Add Timer
+    | DeleteInput
+    | UpdateInput String
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         Add timer ->
             ({model | timers = timer :: model.timers}, Cmd.none)
+        DeleteInput ->
+            ({model | input = ""}, Cmd.none)
+        UpdateInput input ->
+            ({model | input = input}, Cmd.none)
+
+createTimer : String -> Timer
+createTimer name =
+    { time = 0
+    , counting = False
+    , name = Just name
+    }
 
 -- SUBSCRIPTIONS
 
@@ -51,29 +70,28 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    let
-        timer = 
-            { time = 0
-            , counting = False
-            , name = Just "name"
-            }
-    in
         div []
-        [ button [onClick (Add timer)] [text "ADD"]
-        , viewTimerList model
-        ]
+            [ input
+                [ type_ "text"
+                , onInput UpdateInput
+                , onClick DeleteInput
+                , value model.input
+                ] []
+            , button [onClick (Add (createTimer model.input))] [text "ADD"]
+            , viewTimerList model
+            ]
 
 viewTimerList : Model -> Html Msg
 viewTimerList model =
     let
         viewTimer timer =
             li [] 
-            [ button [] [text "START"]
-            , button [] [text "RESET"]
-            , timer.name
-                |> withDefault "timer has no name"
-                |> text
-            ]
+                [ button [] [text "START"]
+                , button [] [text "RESET"]
+                , timer.name
+                    |> withDefault "timer has no name"
+                    |> text
+                ]
         timers = List.map viewTimer model.timers
     in
         ul [] timers
