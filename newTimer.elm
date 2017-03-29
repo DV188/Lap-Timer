@@ -78,20 +78,19 @@ view model =
                 , value model.input
                 ] []
             , button [onClick (Add (createTimer model.input))] [text "ADD"]
-            , viewTimerList model
+            , div [] (viewTimerList model)
             ]
 
-viewTimerList : Model -> Html Msg
+viewTimerList : Model -> List (Html Msg)
 viewTimerList model =
     let
         viewTimer timer =
-            li [] 
+            div [] 
                 [ button [] [text "START"]
                 , button [] [text "RESET"]
                 , timer.name
                     |> withDefault "timer has no name"
                     |> text
                 ]
-        timers = List.map viewTimer model.timers
     in
-        ul [] timers
+        List.map viewTimer model.timers
