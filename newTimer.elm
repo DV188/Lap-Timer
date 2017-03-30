@@ -41,6 +41,7 @@ type Msg
     = Add Timer -- add to list of timers in the model
     | DeleteInput -- clears current text in the model, clears name text field
     | UpdateInput String -- updates the input for the model
+    | UpdateTimer Int String
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -51,6 +52,8 @@ update msg model =
             ({model | input = Nothing}, Cmd.none)
         UpdateInput input ->
             ({model | input = Just input}, Cmd.none)
+        UpdateTimer indexToUpdate newName ->
+            ({model | timers = updateTimer indexToUpdate model.timers newName}, Cmd.none)
 
 -- constructor for new timer
 createTimer : Maybe String -> Timer
@@ -60,9 +63,16 @@ createTimer name =
     , name = name
     }
 
-updateTimer : Timer -> Maybe String -> Timer
-updateTimer timer name =
-    {timer | name = name}
+updateTimer : Int -> List Timer -> String -> List Timer
+updateTimer indexToUpdate list newName =
+    List.indexedMap
+        (\index timer ->
+            if indexToUpdate == index then
+                {timer | name = Just newName }
+            else
+                timer
+        )
+        list
 
 -- SUBSCRIPTIONS
 
@@ -75,16 +85,16 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-        div []
-            [ input
-                [ type_ "text"
-                , onInput UpdateInput
-                , onClick DeleteInput
-                , value (withDefault "" model.input)
-                ] []
-            , button [onClick (Add (createTimer model.input))] [text "ADD"]
-            , div [] (List.indexedMap viewTimer model.timers)
-            ]
+    div []
+        [ input
+            [ type_ "text"
+            , onInput UpdateInput
+            , onClick DeleteInput
+            , value (withDefault "" model.input)
+            ] []
+        , button [onClick (Add (createTimer model.input))] [text "ADD"]
+        , div [] (List.indexedMap viewTimer model.timers)
+        ]
 
 viewTimer : Int -> Timer -> Html Msg
 viewTimer timerIndex timer =
@@ -94,4 +104,9 @@ viewTimer timerIndex timer =
             |> text
         , button [] [text "START"]
         , button [] [text "RESET"]
+        , input
+            [ type_ "text"
+            , onInput (UpdateTimer timerIndex)
+            , value (withDefault "" timer.name)
+            ] []
         ]
