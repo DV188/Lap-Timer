@@ -16,7 +16,7 @@ main =
 
 type alias Model =
     { timers : List Timer
-    , input : String
+    , input : Maybe String
     }
 
 type alias Timer =
@@ -30,7 +30,7 @@ type alias Timer =
 init : (Model, Cmd Msg)
 init =
     ( { timers = []
-      , input = ""
+      , input = Nothing
       }
     , Cmd.none
     )
@@ -38,9 +38,9 @@ init =
 -- UPDATE
 
 type Msg
-    = Add Timer
-    | DeleteInput
-    | UpdateInput String
+    = Add Timer -- add to list of timers in the model
+    | DeleteInput -- clears current text in the model, clears name text field
+    | UpdateInput String -- updates the input for the model
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -48,15 +48,16 @@ update msg model =
         Add timer ->
             ({model | timers = timer :: model.timers}, Cmd.none)
         DeleteInput ->
-            ({model | input = ""}, Cmd.none)
+            ({model | input = Nothing}, Cmd.none)
         UpdateInput input ->
-            ({model | input = input}, Cmd.none)
+            ({model | input = Just input}, Cmd.none)
 
-createTimer : String -> Timer
+-- constructor for new timer
+createTimer : Maybe String -> Timer
 createTimer name =
     { time = 0
     , counting = False
-    , name = Just name
+    , name = name
     }
 
 -- SUBSCRIPTIONS
@@ -75,12 +76,13 @@ view model =
                 [ type_ "text"
                 , onInput UpdateInput
                 , onClick DeleteInput
-                , value model.input
+                , value (withDefault "" model.input)
                 ] []
             , button [onClick (Add (createTimer model.input))] [text "ADD"]
             , div [] (viewTimerList model)
             ]
 
+-- div to draw the timers listed in the model
 viewTimerList : Model -> List (Html Msg)
 viewTimerList model =
     let
@@ -89,7 +91,7 @@ viewTimerList model =
                 [ button [] [text "START"]
                 , button [] [text "RESET"]
                 , timer.name
-                    |> withDefault "timer has no name"
+                    |> withDefault "N/A"
                     |> text
                 ]
     in
