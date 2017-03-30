@@ -60,6 +60,10 @@ createTimer name =
     , name = name
     }
 
+updateTimer : Timer -> Maybe String -> Timer
+updateTimer timer name =
+    {timer | name = name}
+
 -- SUBSCRIPTIONS
 
 subscriptions : Model -> Sub Msg
@@ -79,20 +83,15 @@ view model =
                 , value (withDefault "" model.input)
                 ] []
             , button [onClick (Add (createTimer model.input))] [text "ADD"]
-            , div [] (viewTimerList model)
+            , div [] (List.indexedMap viewTimer model.timers)
             ]
 
--- div to draw the timers listed in the model
-viewTimerList : Model -> List (Html Msg)
-viewTimerList model =
-    let
-        viewTimer timer =
-            div [] 
-                [ button [] [text "START"]
-                , button [] [text "RESET"]
-                , timer.name
-                    |> withDefault "N/A"
-                    |> text
-                ]
-    in
-        List.map viewTimer model.timers
+viewTimer : Int -> Timer -> Html Msg
+viewTimer timerIndex timer =
+    div [] 
+        [ timer.name
+            |> withDefault "N/A"
+            |> text
+        , button [] [text "START"]
+        , button [] [text "RESET"]
+        ]
