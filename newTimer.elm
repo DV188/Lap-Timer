@@ -1,4 +1,4 @@
-import Html exposing (Html, div, text, button, input, ul, li)
+import Html exposing (Html, div, text, button, input)
 import Html.Events exposing (onClick, onInput)
 import Html.Attributes exposing (type_, value)
 import Time exposing (Time, every, second)
@@ -40,7 +40,8 @@ type Msg
     = Add Timer -- add to list of timers in the model
     | DeleteInput -- clears current text in the model, clears name text field
     | UpdateInput String -- updates the input for the model
-    | UpdateTimer Int String
+    | UpdateTimer Int String -- update the list of timers, substituting a new name at given index
+    | Tick Time
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -53,21 +54,35 @@ update msg model =
             ({model | input = input}, Cmd.none)
         UpdateTimer indexToUpdate newName ->
             ({model | timers = updateTimer indexToUpdate model.timers newName}, Cmd.none)
+        Tick _ ->
+            ({model | timers = tickTimer model.timers}, Cmd.none)
 
 -- constructor for new timer
 createTimer : String -> Timer
 createTimer name =
     { time = 0
-    , counting = False
+    , counting = True
     , name = name
     }
 
+-- updates the name field of a timer by checking the index and mapping over the list
 updateTimer : Int -> List Timer -> String -> List Timer
 updateTimer indexToUpdate list newName =
     List.indexedMap
         (\index timer ->
             if indexToUpdate == index then
-                {timer | name = newName }
+                {timer | name = newName}
+            else
+                timer
+        )
+        list
+
+tickTimer : List Timer -> List Timer
+tickTimer list =
+    List.indexedMap
+        (\index timer ->
+            if timer.counting then
+                {timer | time = timer.time + 1}
             else
                 timer
         )
@@ -77,8 +92,8 @@ updateTimer indexToUpdate list newName =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    -- every Time.second Tick
-    Sub.none
+    every Time.second Tick
+    -- Sub.none
 
 -- VIEW
 
@@ -98,11 +113,14 @@ view model =
 viewTimer : Int -> Timer -> Html Msg
 viewTimer timerIndex timer =
     div [] 
-        [ button [] [text "START"]
-        , button [] [text "RESET"]
-        , input
+        [ input
             [ type_ "text"
             , onInput (UpdateTimer timerIndex)
             , value timer.name
             ] []
+        , button [] [text "START"]
+        , button [] [text "RESET"]
+        , timer.time
+            |> toString
+            |> text
         ]
