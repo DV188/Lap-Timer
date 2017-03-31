@@ -41,6 +41,7 @@ type Msg
     | DeleteInput -- clears current text in the model, clears name text field
     | UpdateInput String -- updates the input for the model
     | UpdateTimer Int String -- update the list of timers, substituting a new name at given index
+    | StartTimer Int
     | Tick Time
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -52,8 +53,10 @@ update msg model =
             ({model | input = ""}, Cmd.none)
         UpdateInput input ->
             ({model | input = input}, Cmd.none)
-        UpdateTimer indexToUpdate newName ->
-            ({model | timers = updateTimer indexToUpdate model.timers newName}, Cmd.none)
+        UpdateTimer index newName ->
+            ({model | timers = updateTimer index newName model.timers}, Cmd.none)
+        StartTimer index ->
+            ({model | timers = startTimer index model.timers}, Cmd.none)
         Tick _ ->
             ({model | timers = tickTimer model.timers}, Cmd.none)
 
@@ -61,21 +64,30 @@ update msg model =
 createTimer : String -> Timer
 createTimer name =
     { time = 0
-    , counting = True
+    , counting = False
     , name = name
     }
 
 -- updates the name field of a timer by checking the index and mapping over the list
-updateTimer : Int -> List Timer -> String -> List Timer
-updateTimer indexToUpdate list newName =
+updateTimer : Int -> String -> List Timer -> List Timer
+updateTimer indexToUpdate newName list =
     List.indexedMap
         (\index timer ->
             if indexToUpdate == index then
                 {timer | name = newName}
             else
                 timer
-        )
-        list
+        ) list
+
+startTimer : Int -> List Timer -> List Timer
+startTimer indexToUpdate list =
+    List.indexedMap
+    (\index timer ->
+        if indexToUpdate == index then
+            {timer | counting = not timer.counting}
+        else
+            timer
+    ) list
 
 tickTimer : List Timer -> List Timer
 tickTimer list =
@@ -85,8 +97,7 @@ tickTimer list =
                 {timer | time = timer.time + 1}
             else
                 timer
-        )
-        list
+        ) list
 
 -- SUBSCRIPTIONS
 
@@ -118,7 +129,7 @@ viewTimer timerIndex timer =
             , onInput (UpdateTimer timerIndex)
             , value timer.name
             ] []
-        , button [] [text "START"]
+        , button [onClick (StartTimer timerIndex)] [text "START"]
         , button [] [text "RESET"]
         , timer.time
             |> toString
