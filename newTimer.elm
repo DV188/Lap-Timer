@@ -2,7 +2,6 @@ import Html exposing (Html, div, text, button, input, ul, li)
 import Html.Events exposing (onClick, onInput)
 import Html.Attributes exposing (type_, value)
 import Time exposing (Time, every, second)
-import Maybe exposing (withDefault)
 
 main =
     Html.program
@@ -16,13 +15,13 @@ main =
 
 type alias Model =
     { timers : List Timer
-    , input : Maybe String
+    , input : String
     }
 
 type alias Timer =
     { time : Int
     , counting : Bool
-    , name : Maybe String
+    , name : String
     }
 
 -- INIT
@@ -30,7 +29,7 @@ type alias Timer =
 init : (Model, Cmd Msg)
 init =
     ( { timers = []
-      , input = Nothing
+      , input = ""
       }
     , Cmd.none
     )
@@ -49,14 +48,14 @@ update msg model =
         Add timer ->
             ({model | timers = timer :: model.timers}, Cmd.none)
         DeleteInput ->
-            ({model | input = Nothing}, Cmd.none)
+            ({model | input = ""}, Cmd.none)
         UpdateInput input ->
-            ({model | input = Just input}, Cmd.none)
+            ({model | input = input}, Cmd.none)
         UpdateTimer indexToUpdate newName ->
             ({model | timers = updateTimer indexToUpdate model.timers newName}, Cmd.none)
 
 -- constructor for new timer
-createTimer : Maybe String -> Timer
+createTimer : String -> Timer
 createTimer name =
     { time = 0
     , counting = False
@@ -68,7 +67,7 @@ updateTimer indexToUpdate list newName =
     List.indexedMap
         (\index timer ->
             if indexToUpdate == index then
-                {timer | name = Just newName }
+                {timer | name = newName }
             else
                 timer
         )
@@ -90,7 +89,7 @@ view model =
             [ type_ "text"
             , onInput UpdateInput
             , onClick DeleteInput
-            , value (withDefault "" model.input)
+            , value model.input
             ] []
         , button [onClick (Add (createTimer model.input))] [text "ADD"]
         , div [] (List.indexedMap viewTimer model.timers)
@@ -99,14 +98,11 @@ view model =
 viewTimer : Int -> Timer -> Html Msg
 viewTimer timerIndex timer =
     div [] 
-        [ timer.name
-            |> withDefault "N/A"
-            |> text
-        , button [] [text "START"]
+        [ button [] [text "START"]
         , button [] [text "RESET"]
         , input
             [ type_ "text"
             , onInput (UpdateTimer timerIndex)
-            , value (withDefault "" timer.name)
+            , value timer.name
             ] []
         ]
