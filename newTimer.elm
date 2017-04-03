@@ -24,6 +24,14 @@ type alias Timer =
     , name : String
     }
 
+-- constructor for new timer
+createTimer : String -> Timer
+createTimer name =
+    { time = 0
+    , counting = False
+    , name = name
+    }
+
 -- INIT
 
 init : (Model, Cmd Msg)
@@ -41,8 +49,9 @@ type Msg
     | DeleteInput -- clears current text in the model, clears name text field
     | UpdateInput String -- updates the input for the model
     | UpdateTimer Int String -- update the list of timers, substituting a new name at given index
-    | StartTimer Int
-    | Tick Time
+    | StartTimer Int -- start and stop timer msg
+    | ResetTimer Int
+    | Tick Time -- internal subscription refreshing the time every second
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -57,16 +66,10 @@ update msg model =
             ({model | timers = updateTimer index newName model.timers}, Cmd.none)
         StartTimer index ->
             ({model | timers = startTimer index model.timers}, Cmd.none)
+        ResetTimer index ->
+            ({model | timers = resetTimer index model.timers}, Cmd.none)
         Tick _ ->
             ({model | timers = tickTimer model.timers}, Cmd.none)
-
--- constructor for new timer
-createTimer : String -> Timer
-createTimer name =
-    { time = 0
-    , counting = False
-    , name = name
-    }
 
 -- updates the name field of a timer by checking the index and mapping over the list
 updateTimer : Int -> String -> List Timer -> List Timer
@@ -85,6 +88,18 @@ startTimer indexToUpdate list =
     (\index timer ->
         if indexToUpdate == index then
             {timer | counting = not timer.counting}
+        else
+            timer
+    ) list
+
+resetTimer : Int -> List Timer -> List Timer
+resetTimer indexToUpdate list =
+    List.indexedMap
+    (\index timer ->
+        if indexToUpdate == index then
+            {timer
+                | counting = False
+                , time = 0}
         else
             timer
     ) list
@@ -130,7 +145,7 @@ viewTimer timerIndex timer =
             , value timer.name
             ] []
         , button [onClick (StartTimer timerIndex)] [text "START"]
-        , button [] [text "RESET"]
+        , button [onClick (ResetTimer timerIndex)] [text "RESET"]
         , timer.time
             |> toString
             |> text
