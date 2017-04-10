@@ -1,6 +1,8 @@
 import Html exposing (Html, text, div, button)
 import Html.Events exposing (..)
 import Timer exposing (Timer)
+import Time
+import Maybe exposing (withDefault)
 
 main =
     Html.program
@@ -13,39 +15,34 @@ main =
 -- MODEL
 
 type alias Model =
-    List Timer
+    Timer
 
 init : (Model, Cmd Msg)
 init =
-    ([], Cmd.none)
+    ({time = 0, counting = True}, Cmd.none)
 
 -- UPDATE
 
 type Msg
-    = Add Timer
+    = SubModuleMsg Timer.Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        Add timer ->
-            ( timer :: model
-            , Cmd.none)
+        SubModuleMsg msg ->
+            (Timer.update msg model, Cmd.none)
 
 -- SUBSCRIPTIONS
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Sub.map SubModuleMsg (Timer.subscriptions model)
 
 -- VIEW
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ button
-            [ onClick (Add {time = 0,  counting = True})
-            ]
-            [text "Click Me"]
-        , div []
-                (List.map (\timer -> text (toString timer.time)) model)
-        ]
+    div [] [ model.time 
+                |> toString
+                |> text
+           ]

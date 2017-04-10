@@ -23,33 +23,28 @@ init =
 -- UPDATE
 
 type Msg
-    = Tick
-    | Zero 
+    = Zero 
     | Start
+    | Tick Time
 
-update : Msg -> Timer -> (Timer, Cmd Msg)
+update : Msg -> Timer -> Timer
 update msg timer =
     case msg of
-        Tick ->
-            if (timer.counting) then
-                ( { timer | time = timer.time + 1 }, Cmd.none)
-            else
-                (timer, Cmd.none)
         Zero ->
-            ( { timer |
-                    time = 0,
-                    counting = False
-              }
-            , Cmd.none
-            )
+            { timer |
+                time = 0,
+                counting = False
+            }
         Start ->
-            ({ timer | counting = not timer.counting } , Cmd.none)
+            {timer | counting = not timer.counting}
+        Tick _ ->
+            {timer | time = timer.time + 1}
 
 -- SUBSCRIPTIONS
 
 subscriptions : Timer -> Sub Msg
 subscriptions timer =
-    every Time.second (\_ -> Tick)
+    every Time.second Tick
 
 -- VIEW
 
