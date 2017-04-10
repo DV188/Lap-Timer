@@ -5,7 +5,7 @@ import Time exposing (Time, every, second)
 -- MODEL
 
 type alias Timer =
-    { time : Int
+    { time : Time
     , counting : Bool
     }
 
@@ -14,7 +14,7 @@ type alias Timer =
 type Msg
     = Zero 
     | Start
-    | Tick Time
+    | Tick 
 
 update : Msg -> Timer -> Timer
 update msg timer =
@@ -26,14 +26,14 @@ update msg timer =
             }
         Start ->
             {timer | counting = not timer.counting}
-        Tick _ ->
-            {timer | time = timer.time + 1}
+        Tick ->
+            {timer | time = timer.time + second}
 
 -- SUBSCRIPTIONS
 
 subscriptions : Timer -> Sub Msg
 subscriptions timer =
     if timer.counting then
-        every second Tick
+        every second (\_ -> Tick)
     else
         Sub.none

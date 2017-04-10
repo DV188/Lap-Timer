@@ -1,6 +1,7 @@
 import Html exposing (Html, text, div, button)
 import Html.Events exposing (..)
 import Timer exposing (Timer)
+import Time
 import Maybe exposing (withDefault)
 
 main =
@@ -42,6 +43,7 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div [] [ model.time
+                |> Time.inSeconds
                 |> toString
                 |> text
            , button [onClick (TimerMsg Timer.Start)] [text "Start"]
