@@ -4,6 +4,7 @@ import Timer exposing (Timer)
 import Time
 import Maybe exposing (withDefault)
 
+main : Program Never Model Msg
 main =
     Html.program
         { init = init
