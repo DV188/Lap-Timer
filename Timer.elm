@@ -1,6 +1,6 @@
 module Timer exposing (..)
 
-import Time exposing (Time, every, second)
+import Time exposing (Time, every, second, inSeconds)
 
 -- MODEL
 
@@ -14,7 +14,6 @@ type alias Timer =
 type Msg
     = Zero 
     | Start
-    | Tick 
 
 update : Msg -> Timer -> Timer
 update msg timer =
@@ -26,14 +25,21 @@ update msg timer =
             }
         Start ->
             {timer | counting = not timer.counting}
-        Tick ->
-            {timer | time = timer.time + second}
 
--- SUBSCRIPTIONS
-
-subscriptions : Timer -> Sub Msg
-subscriptions timer =
-    if timer.counting then
-        every second (\_ -> Tick)
+step : Timer -> Timer
+step timer =
+    if timer.counting == True then
+        {timer | time = timer.time + (0.01*second)}
     else
-        Sub.none
+        timer
+
+zero : Timer -> Timer
+zero timer =
+    {timer
+        | time = 0
+        , counting = False
+    }
+
+start : Timer -> Timer
+start timer =
+    {timer | counting = not timer.counting}
