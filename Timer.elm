@@ -9,22 +9,13 @@ type alias Timer =
     , counting : Bool
     }
 
+init : Timer
+init =
+    {time = 0
+    , counting = False
+    }
+
 -- UPDATE
-
-type Msg
-    = Zero 
-    | Start
-
-update : Msg -> Timer -> Timer
-update msg timer =
-    case msg of
-        Zero ->
-            { timer |
-                time = 0,
-                counting = False
-            }
-        Start ->
-            {timer | counting = not timer.counting}
 
 step : Timer -> Timer
 step timer =
