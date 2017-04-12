@@ -1,8 +1,7 @@
 import Html exposing (Html, text, div, button)
-import Html.Events exposing (..)
+import Html.Events exposing (onClick)
 import Timer exposing (Timer)
 import Time
-import Maybe exposing (withDefault)
 
 main : Program Never Model Msg
 main =
@@ -25,11 +24,14 @@ init =
 -- UPDATE
 
 type Msg
-    = TimerMsg Timer.Msg
+    = Tick
+    | TimerMsg Timer.Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
+        Tick ->
+            (Timer.step model, Cmd.none)
         TimerMsg msg ->
             (Timer.update msg model, Cmd.none)
 
@@ -37,7 +39,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map TimerMsg (Timer.subscriptions model)
+    Time.every (0.01*Time.second) (\_ -> Tick)
 
 -- VIEW
 
