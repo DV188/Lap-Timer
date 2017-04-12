@@ -26,6 +26,7 @@ init =
 type Msg
     = Tick
     | TimerMsg Timer.Msg
+    | Start
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -34,6 +35,8 @@ update msg model =
             (Timer.step model, Cmd.none)
         TimerMsg msg ->
             (Timer.update msg model, Cmd.none)
+        Start ->
+            (Timer.start model, Cmd.none)
 
 -- SUBSCRIPTIONS
 
@@ -50,5 +53,6 @@ view model =
                 |> toString
                 |> text
            , button [onClick (TimerMsg Timer.Start)] [text "Start"]
+           , button [onClick (Start)] [text "Start"]
            , button [onClick (TimerMsg Timer.Zero)] [text "Reset"]
            ]
