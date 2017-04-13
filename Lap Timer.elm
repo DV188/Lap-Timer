@@ -1,6 +1,7 @@
 import Html exposing (Html, div, text, button, input)
 import Html.Attributes exposing (type_, value)
 import Html.Events exposing (onClick, onInput)
+import Racer exposing (Racer)
 import Time
 import Timer exposing (Timer)
 
@@ -16,7 +17,7 @@ main =
 -- MODEL
 
 type alias Model =
-    { timers : List Timer
+    { racers : List Racer
     , input : String
     }
 
@@ -24,7 +25,7 @@ type alias Model =
 
 init : (Model, Cmd Msg)
 init =
-    ( { timers = []
+    ( { racers = []
       , input = ""
       }
     , Cmd.none
@@ -35,56 +36,70 @@ init =
 type Msg
     = DeleteInput -- clears current text in the model, clears name text field
     | UpdateInput String -- updates the input for the model
-    | Add Timer -- add to list of timers in the model
-    -- | UpdateTimer Int String -- update the list of timers, substituting a new name at given index
+    | Add Racer -- add to list of timers in the model
     | StartTimer Int -- start and stop timer msg
     | ZeroTimer Int -- sets the current timer to 0 and stops counting
-    | NameTimer Int String
+    | NameRacer Int String
+    | StartAllTimer
     | Tick -- internal subscription refreshing the time every second
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        Add timer ->
-            ({model | timers = timer :: model.timers}, Cmd.none)
         DeleteInput ->
             ({model | input = ""}, Cmd.none)
         UpdateInput input ->
             ({model | input = input}, Cmd.none)
+        Add racer ->
+            ({model | racers = racer :: model.racers}, Cmd.none)
         StartTimer index ->
-            ({model | timers = updateTimer index Timer.start model.timers}, Cmd.none)
+            ({model | racers = updateTimer index Timer.start model.racers}, Cmd.none)
         ZeroTimer index ->
-            ({model | timers = updateTimer index Timer.zero model.timers}, Cmd.none)
-        NameTimer index newName ->
-            ({model | timers = updateName index newName model.timers}, Cmd.none)
+            ({model | racers = updateTimer index Timer.zero model.racers}, Cmd.none)
+        NameRacer index newName ->
+            ({model | racers = updateName index newName model.racers}, Cmd.none)
+        StartAllTimer ->
+            -- ({model | racers = List.map (\racer -> Timer.start racer.timer) model.racers}, Cmd.none)
+            ({model | racers = updateTimers Timer.start model.racers}, Cmd.none)
         Tick ->
-            ( { model | timers =
-                    model.timers
-                        |> List.map (\timer -> Timer.step timer)
+            ( { model | racers = updateTimers Timer.step model.racers
+--                         |> List.map
+--                             (\racer ->
+--                                 {racer | timer = Timer.step racer.timer}
+--                             )
               }
             , Cmd.none
             )
 
-updateTimer : Int -> (Timer -> Timer) -> List Timer -> List Timer
+updateTimer : Int -> (Timer -> Timer) -> List Racer -> List Racer
 updateTimer indexToUpdate timerFunction list =
     let
-        mappingFunction index timer =
+        mappingFunction index racer =
             if indexToUpdate == index then
-                timerFunction timer
+                {racer | timer = timerFunction racer.timer}
             else
-                timer
+                racer
     in
         list
             |> List.indexedMap mappingFunction
 
-updateName : Int -> String -> List Timer -> List Timer
+updateName : Int -> String -> List Racer -> List Racer
 updateName indexToUpdate name list =
     let
-        mappingFunction index timer =
+        mappingFunction index racer =
             if indexToUpdate == index then
-                Timer.name name timer
+                {racer | name = name}
             else
-                timer
+                racer
+    in
+        list
+            |> List.indexedMap mappingFunction
+
+updateTimers : (Timer -> Timer) -> List Racer -> List Racer
+updateTimers timerFunction list =
+    let
+        mappingFunction index racer =
+                {racer | timer = timerFunction racer.timer}
     in
         list
             |> List.indexedMap mappingFunction
@@ -106,23 +121,24 @@ view model =
             , onClick DeleteInput
             , value model.input
             ] []
+        , button [onClick (Add (Racer.initName model.input))] [text "ADD"]
         , button
-            [onClick (Add (Timer.name model.input Timer.init))]
-            [text "ADD"]
-        , div [] (List.indexedMap viewTimer model.timers)
+            [onClick (StartAllTimer )]
+            [text "RACE"]
+        , div [] (List.indexedMap viewRacer model.racers)
         ]
 
-viewTimer : Int -> Timer -> Html Msg
-viewTimer timerIndex timer =
+viewRacer : Int -> Racer -> Html Msg
+viewRacer racerIndex racer =
     div [] 
         [ input
             [ type_ "text"
-            , onInput (NameTimer timerIndex)
-            , value timer.name
+            , onInput (NameRacer racerIndex)
+            , value racer.name
             ] []
-        , button [onClick (StartTimer timerIndex)] [text "START"]
-        , button [onClick (ZeroTimer timerIndex)] [text "RESET"]
-        , timer.time
+        , button [onClick (StartTimer racerIndex)] [text "START"]
+        , button [onClick (ZeroTimer racerIndex)] [text "RESET"]
+        , racer.timer.time
             |> Time.inSeconds
             |> toString
             |> text

@@ -7,14 +7,12 @@ import Time exposing (Time, second)
 type alias Timer =
     { time : Time
     , counting : Bool
-    , name : String
     }
 
 init : Timer
 init =
     { time = 0
     , counting = False
-    , name = ""
     }
 
 -- UPDATE
@@ -36,7 +34,3 @@ zero timer =
 start : Timer -> Timer
 start timer =
     {timer | counting = not timer.counting}
-
-name : String -> Timer -> Timer
-name newName timer =
-    {timer | name = newName}
