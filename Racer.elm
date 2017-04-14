@@ -24,9 +24,3 @@ initName name =
     , timer = Timer.init
     , lap = []
     }
-
--- UPDATE
-
-step : Racer -> Racer
-step racer =
-    {racer | timer = Timer.step racer.timer}

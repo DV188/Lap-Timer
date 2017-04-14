@@ -1,5 +1,6 @@
 import Html exposing (Html, div, text, button, input)
-import Html.Attributes exposing (type_, value)
+
+import Html.Attributes exposing (type_, value, placeholder)
 import Html.Events exposing (onClick, onInput)
 import Racer exposing (Racer)
 import Time
@@ -80,8 +81,7 @@ updateTimer indexToUpdate timerFunction list =
             else
                 racer
     in
-        list
-            |> List.indexedMap mappingFunction
+        List.indexedMap mappingFunction list
 
 updateName : Int -> String -> List Racer -> List Racer
 updateName indexToUpdate name list =
@@ -92,8 +92,7 @@ updateName indexToUpdate name list =
             else
                 racer
     in
-        list
-            |> List.indexedMap mappingFunction
+        List.indexedMap mappingFunction list
 
 updateTimers : (Timer -> Timer) -> List Racer -> List Racer
 updateTimers timerFunction list =
@@ -101,8 +100,7 @@ updateTimers timerFunction list =
         mappingFunction index racer =
                 {racer | timer = timerFunction racer.timer}
     in
-        list
-            |> List.indexedMap mappingFunction
+        List.indexedMap mappingFunction list
 
 -- SUBSCRIPTIONS
 
@@ -117,14 +115,13 @@ view model =
     div []
         [ input
             [ type_ "text"
+            , placeholder "Enter racer name."
             , onInput UpdateInput
             , onClick DeleteInput
             , value model.input
             ] []
         , button [onClick (Add (Racer.initName model.input))] [text "ADD"]
-        , button
-            [onClick (StartAllTimer )]
-            [text "RACE"]
+        , button [onClick (StartAllTimer )] [text "RACE"]
         , div [] (List.indexedMap viewRacer model.racers)
         ]
 
