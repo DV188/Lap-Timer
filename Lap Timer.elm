@@ -1,5 +1,25 @@
 import Html exposing (Html, div, text, button, input)
 
+import Css exposing
+    ( backgroundColor
+    , border
+    , border3
+    , borderRadius
+    , color
+    , cursor
+    , display
+    , fontFamilies
+    , fontSize
+    , hex
+    , inlineBlock
+    , none
+    , padding2
+    , pointer
+    , px
+    , solid
+    , textDecoration
+    , textShadow4
+    )
 import Html.Attributes exposing (type_, value, placeholder)
 import Html.Events exposing (onClick, onInput)
 import Racer exposing (Racer)
@@ -42,6 +62,7 @@ type Msg
     | ZeroTimer Int -- sets the current timer to 0 and stops counting
     | NameRacer Int String
     | StartAllTimer
+    | LapTimer Int
     | Tick -- internal subscription refreshing the time every second
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -60,14 +81,11 @@ update msg model =
         NameRacer index newName ->
             ({model | racers = updateName index newName model.racers}, Cmd.none)
         StartAllTimer ->
-            -- ({model | racers = List.map (\racer -> Timer.start racer.timer) model.racers}, Cmd.none)
             ({model | racers = updateTimers Timer.start model.racers}, Cmd.none)
+        LapTimer index ->
+            ({model | racers = updateLap index model.racers}, Cmd.none)
         Tick ->
             ( { model | racers = updateTimers Timer.step model.racers
---                         |> List.map
---                             (\racer ->
---                                 {racer | timer = Timer.step racer.timer}
---                             )
               }
             , Cmd.none
             )
@@ -94,6 +112,17 @@ updateName indexToUpdate name list =
     in
         List.indexedMap mappingFunction list
 
+updateLap : Int -> List Racer -> List Racer
+updateLap indexToUpdate list =
+    let
+        mappingFunction index racer =
+            if indexToUpdate == index then
+                Racer.lap racer
+            else
+                racer
+    in
+        List.indexedMap mappingFunction list
+
 updateTimers : (Timer -> Timer) -> List Racer -> List Racer
 updateTimers timerFunction list =
     let
@@ -110,20 +139,48 @@ subscriptions model =
 
 -- VIEW
 
+-- elm-css module boilderplate to make the html module play nice
+styles =
+    Css.asPairs >> Html.Attributes.style
+
 view : Model -> Html Msg
 view model =
-    div []
-        [ input
-            [ type_ "text"
-            , placeholder "Enter racer name."
-            , onInput UpdateInput
-            , onClick DeleteInput
-            , value model.input
-            ] []
-        , button [onClick (Add (Racer.initName model.input))] [text "ADD"]
-        , button [onClick (StartAllTimer )] [text "RACE"]
-        , div [] (List.indexedMap viewRacer model.racers)
-        ]
+    let
+        buttonStyle =
+            styles
+                [ backgroundColor (hex "E4685D")
+                , borderRadius (px 4)
+                , border3 (px 1) solid (hex "FFFFFF")
+                , display inlineBlock
+                , cursor pointer
+                , color (hex "FFFFFF")
+                , fontFamilies ["Arial"]
+                , fontSize (px 15)
+                , padding2 (px 6) (px 15)
+                , textDecoration none
+                , textShadow4 (px 0) (px 0) (px 0) (hex "B23E35")
+                ]
+    in
+        div []
+            [ input
+                [ type_ "text"
+                , placeholder "Enter racer name."
+                , onInput UpdateInput
+                , onClick DeleteInput
+                , value model.input
+                ] []
+            , button
+                [ onClick (Add (Racer.initName model.input))
+                , buttonStyle
+                ]
+                [text "ADD"]
+            , button
+                [onClick (StartAllTimer)
+                , buttonStyle
+                ]
+                [text "RACE"]
+            , div [] (List.indexedMap viewRacer model.racers)
+            ]
 
 viewRacer : Int -> Racer -> Html Msg
 viewRacer racerIndex racer =
@@ -134,9 +191,11 @@ viewRacer racerIndex racer =
             , value racer.name
             ] []
         , button [onClick (StartTimer racerIndex)] [text "START"]
+        , button [onClick (LapTimer racerIndex)] [text "LAP"]
         , button [onClick (ZeroTimer racerIndex)] [text "RESET"]
         , racer.timer.time
             |> Time.inSeconds
             |> toString
             |> text
+        , div [] (List.map (\lap -> text (toString (Time.inSeconds lap))) racer.lap)
         ]

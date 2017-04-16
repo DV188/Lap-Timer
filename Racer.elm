@@ -24,3 +24,7 @@ initName name =
     , timer = Timer.init
     , lap = []
     }
+
+lap : Racer -> Racer
+lap racer =
+    {racer | lap = racer.timer.time :: racer.lap}
