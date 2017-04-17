@@ -1,30 +1,17 @@
 import Html exposing (Html, div, text, button, input)
 
-import Css exposing
-    ( backgroundColor
-    , border
-    , border3
-    , borderRadius
-    , color
-    , cursor
-    , display
-    , fontFamilies
-    , fontSize
-    , hex
-    , inlineBlock
-    , none
-    , padding2
-    , pointer
-    , px
-    , solid
-    , textDecoration
-    , textShadow4
-    )
 import Html.Attributes exposing (type_, value, placeholder)
 import Html.Events exposing (onClick, onInput)
 import Racer exposing (Racer)
 import Time
 import Timer exposing (Timer)
+
+-- CSS boilerplate using the elm-mdl library
+import Material
+import Material.Scheme
+import Material.Button as Button
+import Material.Icon as Icon
+import Material.Options as Options exposing (css)
 
 main : Program Never Model Msg
 main =
@@ -40,7 +27,11 @@ main =
 type alias Model =
     { racers : List Racer
     , input : String
+    , mdl : Material.Model -- Boilerplate: model store for any and all Mdl components you use.
     }
+
+type alias Mdl = -- Boilerplate
+    Material.Model
 
 -- INIT
 
@@ -48,6 +39,7 @@ init : (Model, Cmd Msg)
 init =
     ( { racers = []
       , input = ""
+      , mdl = Material.model -- Boilerplate: Always use this initial Mdl model store.
       }
     , Cmd.none
     )
@@ -64,6 +56,7 @@ type Msg
     | StartAllTimer
     | LapTimer Int
     | Tick -- internal subscription refreshing the time every second
+    | Mdl (Material.Msg Msg) -- Boilerplate: Msg clause for internal Mdl messages.
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -89,6 +82,8 @@ update msg model =
               }
             , Cmd.none
             )
+        Mdl msg_ -> -- Boilerplate: Mdl action handler.
+            Material.update Mdl msg_ model
 
 updateTimer : Int -> (Timer -> Timer) -> List Racer -> List Racer
 updateTimer indexToUpdate timerFunction list =
@@ -139,48 +134,38 @@ subscriptions model =
 
 -- VIEW
 
--- elm-css module boilderplate to make the html module play nice
-styles =
-    Css.asPairs >> Html.Attributes.style
-
 view : Model -> Html Msg
 view model =
-    let
-        buttonStyle =
-            styles
-                [ backgroundColor (hex "E4685D")
-                , borderRadius (px 4)
-                , border3 (px 1) solid (hex "FFFFFF")
-                , display inlineBlock
-                , cursor pointer
-                , color (hex "FFFFFF")
-                , fontFamilies ["Arial"]
-                , fontSize (px 15)
-                , padding2 (px 6) (px 15)
-                , textDecoration none
-                , textShadow4 (px 0) (px 0) (px 0) (hex "B23E35")
-                ]
-    in
-        div []
-            [ input
-                [ type_ "text"
-                , placeholder "Enter racer name."
-                , onInput UpdateInput
-                , onClick DeleteInput
-                , value model.input
-                ] []
-            , button
-                [ onClick (Add (Racer.initName model.input))
-                , buttonStyle
-                ]
-                [text "ADD"]
-            , button
-                [onClick (StartAllTimer)
-                , buttonStyle
-                ]
-                [text "RACE"]
-            , div [] (List.indexedMap viewRacer model.racers)
+    div []
+        [ input
+            [ type_ "text"
+            , placeholder "Enter racer name."
+            , onInput UpdateInput
+            , onClick DeleteInput
+            , value model.input
+            ] []
+--             , button
+--                 [ onClick (Add (Racer.initName model.input))]
+--                 [text "ADD"]
+        , Button.render Mdl [0] model.mdl
+            [ Button.fab
+            , Button.colored
+            , Button.ripple
+            , Options.onClick (Add (Racer.initName model.input))
+            , css "margin" "0 24px"
             ]
+            [Icon.i "add"]
+        , Button.render Mdl [1] model.mdl
+            [ Button.raised
+            , Button.colored
+            , Button.ripple
+            , Options.onClick StartAllTimer
+            , css "margin" "0 24px"
+            ]
+            [ text "RACE"]
+        , div [] (List.indexedMap viewRacer model.racers)
+        ]
+        |> Material.Scheme.top
 
 viewRacer : Int -> Racer -> Html Msg
 viewRacer racerIndex racer =
