@@ -1,6 +1,6 @@
-import Html exposing (Html, div, text, button, input)
+import Html exposing (Html, div, text, button, input, p)
 
-import Html.Attributes exposing (type_, value, placeholder)
+import Html.Attributes exposing (type_, value, placeholder, style)
 import Html.Events exposing (onClick, onInput)
 import Racer exposing (Racer)
 import Time
@@ -8,10 +8,14 @@ import Timer exposing (Timer)
 
 -- CSS boilerplate using the elm-mdl library
 import Material
-import Material.Scheme
 import Material.Button as Button
 import Material.Icon as Icon
 import Material.Options as Options exposing (css)
+import Material.Scheme
+import Material.Textfield as Textfield
+import Material.Typography as Typo
+
+import Material.Grid exposing (grid, cell, size, offset, Device(..))
 
 main : Program Never Model Msg
 main =
@@ -134,53 +138,102 @@ subscriptions model =
 
 -- VIEW
 
+-- top : (Html a)
+-- top =
+--   grid []
+--     [ cell [ size All 4, css "border-style" "solid" ]
+--         [ Html.h4 [] [text "size 4"]
+--         ]
+--     , cell [ size All 2, css "border-style" "solid" ]
+--         [ Html.h4 [] [text "size 2"]
+--         ]
+--     , cell [ offset All 2, size All 4, css "border-style" "solid" ]
+--         [ Html.h4 [] [text "size 4"]
+--         , p [] [text "This cell is offset by 2"]
+--         ]
+--     , cell [ size All 6, css "border-style" "solid" ]
+--         [ Html.h4 [] [text "size 6"]
+--         ]
+--     , cell [ size Tablet 6, size Desktop 12, size Phone 2, css "border-style" "solid" ]
+--         [ Html.h4 [] [text "size 6"]
+--         , p [] [text "Size varies with device"]
+--         ]
+--     ]
+--         |> Material.Scheme.top
+
 view : Model -> Html Msg
 view model =
-    div []
-        [ input
-            [ type_ "text"
-            , placeholder "Enter racer name."
-            , onInput UpdateInput
-            , onClick DeleteInput
-            , value model.input
-            ] []
---             , button
---                 [ onClick (Add (Racer.initName model.input))]
---                 [text "ADD"]
-        , Button.render Mdl [0] model.mdl
-            [ Button.fab
-            , Button.colored
-            , Button.ripple
-            , Options.onClick (Add (Racer.initName model.input))
-            , css "margin" "0 24px"
+    grid []
+        [ cell [size All 12]
+            [ div [style [("width", "473px"), ("margin", "auto")]]
+                [ Textfield.render Mdl [0] model.mdl
+                    [ Textfield.label "Enter racer name:"
+                    , Textfield.floatingLabel
+                    , Textfield.text_
+                    , Options.onInput UpdateInput
+                    , Options.onClick DeleteInput
+                    , Textfield.value model.input
+                    ]
+                    []
+                , Button.render Mdl [1] model.mdl
+                    [ Button.raised
+                    , Button.colored
+                    , Button.ripple
+                    , Options.onClick (Add (Racer.initName model.input))
+                    , css "margin" "5px 5px"
+                    ]
+                    [text "ADD"]
+                , Button.render Mdl [2] model.mdl
+                    [ Button.raised
+                    , Button.colored
+                    , Button.ripple
+                    , Options.onClick StartAllTimer
+                    , css "margin" "5px 5px"
+                    ]
+                    [text "RACE"]
+                ]
+            , div [] (List.indexedMap viewRacer model.racers)
             ]
-            [Icon.i "add"]
-        , Button.render Mdl [1] model.mdl
-            [ Button.raised
-            , Button.colored
-            , Button.ripple
-            , Options.onClick StartAllTimer
-            , css "margin" "0 24px"
-            ]
-            [ text "RACE"]
-        , div [] (List.indexedMap viewRacer model.racers)
         ]
-        |> Material.Scheme.top
+            |> Material.Scheme.top
 
 viewRacer : Int -> Racer -> Html Msg
 viewRacer racerIndex racer =
-    div [] 
-        [ input
-            [ type_ "text"
-            , onInput (NameRacer racerIndex)
-            , value racer.name
-            ] []
-        , button [onClick (StartTimer racerIndex)] [text "START"]
-        , button [onClick (LapTimer racerIndex)] [text "LAP"]
-        , button [onClick (ZeroTimer racerIndex)] [text "RESET"]
-        , racer.timer.time
-            |> Time.inSeconds
-            |> toString
-            |> text
-        , div [] (List.map (\lap -> text (toString (Time.inSeconds lap))) racer.lap)
-        ]
+    let
+        buttonRaised index msg label =
+            Button.render Mdl [index] Material.model
+                [ Button.raised
+                , Button.colored
+                , Button.ripple
+                , Options.onClick (msg racerIndex)
+                , css "margin" "0 5px"
+                ]
+                [text label]
+        textStyled item =
+            Options.styled p [Typo.button , Typo.left] [item]
+    in
+        div [] 
+            [ Textfield.render Mdl [0] Material.model
+                [ Textfield.text_
+                , Options.onInput (NameRacer racerIndex)
+                , Textfield.value racer.name
+                ]
+                []
+            , buttonRaised 3 StartTimer "START"
+            , buttonRaised 4 LapTimer "LAP"
+            , buttonRaised 5 ZeroTimer "RESET"
+            , textStyled
+                ( racer.timer.time
+                    |> Time.inSeconds
+                    |> toString
+                    |> text
+                )
+            , div []
+                [ racer.lap
+                    |> List.map (\lap -> toString (Time.inSeconds lap))
+                    |> List.intersperse " | "
+                    |> String.concat
+                    |> text
+                    |> textStyled
+                ]
+            ]
