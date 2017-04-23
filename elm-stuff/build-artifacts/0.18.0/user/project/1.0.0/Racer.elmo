@@ -1,0 +1,23 @@
+var _user$project$Racer$lap = function (racer) {
+	return _elm_lang$core$Native_Utils.update(
+		racer,
+		{
+			lap: {ctor: '::', _0: racer.timer.time, _1: racer.lap}
+		});
+};
+var _user$project$Racer$initName = function (name) {
+	return {
+		name: name,
+		timer: _user$project$Timer$init,
+		lap: {ctor: '[]'}
+	};
+};
+var _user$project$Racer$init = {
+	name: '',
+	timer: _user$project$Timer$init,
+	lap: {ctor: '[]'}
+};
+var _user$project$Racer$Racer = F3(
+	function (a, b, c) {
+		return {name: a, timer: b, lap: c};
+	});

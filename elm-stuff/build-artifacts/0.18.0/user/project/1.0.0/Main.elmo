@@ -1,0 +1,479 @@
+var _user$project$Main$updateTimers = F2(
+	function (timerFunction, list) {
+		var mappingFunction = F2(
+			function (index, racer) {
+				return _elm_lang$core$Native_Utils.update(
+					racer,
+					{
+						timer: timerFunction(racer.timer)
+					});
+			});
+		return A2(_elm_lang$core$List$indexedMap, mappingFunction, list);
+	});
+var _user$project$Main$updateLap = F2(
+	function (indexToUpdate, list) {
+		var mappingFunction = F2(
+			function (index, racer) {
+				return _elm_lang$core$Native_Utils.eq(indexToUpdate, index) ? _user$project$Racer$lap(racer) : racer;
+			});
+		return A2(_elm_lang$core$List$indexedMap, mappingFunction, list);
+	});
+var _user$project$Main$updateName = F3(
+	function (indexToUpdate, name, list) {
+		var mappingFunction = F2(
+			function (index, racer) {
+				return _elm_lang$core$Native_Utils.eq(indexToUpdate, index) ? _elm_lang$core$Native_Utils.update(
+					racer,
+					{name: name}) : racer;
+			});
+		return A2(_elm_lang$core$List$indexedMap, mappingFunction, list);
+	});
+var _user$project$Main$updateTimer = F3(
+	function (indexToUpdate, timerFunction, list) {
+		var mappingFunction = F2(
+			function (index, racer) {
+				return _elm_lang$core$Native_Utils.eq(indexToUpdate, index) ? _elm_lang$core$Native_Utils.update(
+					racer,
+					{
+						timer: timerFunction(racer.timer)
+					}) : racer;
+			});
+		return A2(_elm_lang$core$List$indexedMap, mappingFunction, list);
+	});
+var _user$project$Main$init = {
+	ctor: '_Tuple2',
+	_0: {
+		racers: {ctor: '[]'},
+		input: '',
+		mdl: _debois$elm_mdl$Material$model
+	},
+	_1: _elm_lang$core$Platform_Cmd$none
+};
+var _user$project$Main$Model = F3(
+	function (a, b, c) {
+		return {racers: a, input: b, mdl: c};
+	});
+var _user$project$Main$Mdl = function (a) {
+	return {ctor: 'Mdl', _0: a};
+};
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p0 = msg;
+		switch (_p0.ctor) {
+			case 'DeleteInput':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{input: ''}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'UpdateInput':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{input: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Add':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							racers: {ctor: '::', _0: _p0._0, _1: model.racers}
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'StartTimer':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							racers: A3(_user$project$Main$updateTimer, _p0._0, _user$project$Timer$start, model.racers)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'ZeroTimer':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							racers: A3(_user$project$Main$updateTimer, _p0._0, _user$project$Timer$zero, model.racers)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'NameRacer':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							racers: A3(_user$project$Main$updateName, _p0._0, _p0._1, model.racers)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'StartAllTimer':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							racers: A2(_user$project$Main$updateTimers, _user$project$Timer$start, model.racers)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'LapTimer':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							racers: A2(_user$project$Main$updateLap, _p0._0, model.racers)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Tick':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							racers: A2(_user$project$Main$updateTimers, _user$project$Timer$step, model.racers)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return A3(_debois$elm_mdl$Material$update, _user$project$Main$Mdl, _p0._0, model);
+		}
+	});
+var _user$project$Main$Tick = {ctor: 'Tick'};
+var _user$project$Main$subscriptions = function (model) {
+	return A2(
+		_elm_lang$core$Time$every,
+		1.0e-2 * _elm_lang$core$Time$second,
+		function (_p1) {
+			return _user$project$Main$Tick;
+		});
+};
+var _user$project$Main$LapTimer = function (a) {
+	return {ctor: 'LapTimer', _0: a};
+};
+var _user$project$Main$StartAllTimer = {ctor: 'StartAllTimer'};
+var _user$project$Main$NameRacer = F2(
+	function (a, b) {
+		return {ctor: 'NameRacer', _0: a, _1: b};
+	});
+var _user$project$Main$ZeroTimer = function (a) {
+	return {ctor: 'ZeroTimer', _0: a};
+};
+var _user$project$Main$StartTimer = function (a) {
+	return {ctor: 'StartTimer', _0: a};
+};
+var _user$project$Main$viewRacer = F2(
+	function (racerIndex, racer) {
+		var textStyled = function (item) {
+			return A3(
+				_debois$elm_mdl$Material_Options$styled,
+				_elm_lang$html$Html$p,
+				{
+					ctor: '::',
+					_0: _debois$elm_mdl$Material_Typography$button,
+					_1: {
+						ctor: '::',
+						_0: _debois$elm_mdl$Material_Typography$left,
+						_1: {ctor: '[]'}
+					}
+				},
+				{
+					ctor: '::',
+					_0: item,
+					_1: {ctor: '[]'}
+				});
+		};
+		var buttonRaised = F3(
+			function (index, msg, label) {
+				return A5(
+					_debois$elm_mdl$Material_Button$render,
+					_user$project$Main$Mdl,
+					{
+						ctor: '::',
+						_0: index,
+						_1: {ctor: '[]'}
+					},
+					_debois$elm_mdl$Material$model,
+					{
+						ctor: '::',
+						_0: _debois$elm_mdl$Material_Button$raised,
+						_1: {
+							ctor: '::',
+							_0: _debois$elm_mdl$Material_Button$colored,
+							_1: {
+								ctor: '::',
+								_0: _debois$elm_mdl$Material_Button$ripple,
+								_1: {
+									ctor: '::',
+									_0: _debois$elm_mdl$Material_Options$onClick(
+										msg(racerIndex)),
+									_1: {
+										ctor: '::',
+										_0: A2(_debois$elm_mdl$Material_Options$css, 'margin', '0 5px'),
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(label),
+						_1: {ctor: '[]'}
+					});
+			});
+		return A2(
+			_elm_lang$html$Html$div,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: A5(
+					_debois$elm_mdl$Material_Textfield$render,
+					_user$project$Main$Mdl,
+					{
+						ctor: '::',
+						_0: 0,
+						_1: {ctor: '[]'}
+					},
+					_debois$elm_mdl$Material$model,
+					{
+						ctor: '::',
+						_0: _debois$elm_mdl$Material_Textfield$text_,
+						_1: {
+							ctor: '::',
+							_0: _debois$elm_mdl$Material_Options$onInput(
+								_user$project$Main$NameRacer(racerIndex)),
+							_1: {
+								ctor: '::',
+								_0: _debois$elm_mdl$Material_Textfield$value(racer.name),
+								_1: {ctor: '[]'}
+							}
+						}
+					},
+					{ctor: '[]'}),
+				_1: {
+					ctor: '::',
+					_0: A3(buttonRaised, 3, _user$project$Main$StartTimer, 'START'),
+					_1: {
+						ctor: '::',
+						_0: A3(buttonRaised, 4, _user$project$Main$LapTimer, 'LAP'),
+						_1: {
+							ctor: '::',
+							_0: A3(buttonRaised, 5, _user$project$Main$ZeroTimer, 'RESET'),
+							_1: {
+								ctor: '::',
+								_0: textStyled(
+									_elm_lang$html$Html$text(
+										_elm_lang$core$Basics$toString(
+											_elm_lang$core$Time$inSeconds(racer.timer.time)))),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: textStyled(
+												_elm_lang$html$Html$text(
+													_elm_lang$core$String$concat(
+														A2(
+															_elm_lang$core$List$intersperse,
+															' | ',
+															A2(
+																_elm_lang$core$List$map,
+																function (lap) {
+																	return _elm_lang$core$Basics$toString(
+																		_elm_lang$core$Time$inSeconds(lap));
+																},
+																racer.lap))))),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				}
+			});
+	});
+var _user$project$Main$Add = function (a) {
+	return {ctor: 'Add', _0: a};
+};
+var _user$project$Main$UpdateInput = function (a) {
+	return {ctor: 'UpdateInput', _0: a};
+};
+var _user$project$Main$DeleteInput = {ctor: 'DeleteInput'};
+var _user$project$Main$view = function (model) {
+	return _debois$elm_mdl$Material_Scheme$top(
+		A2(
+			_debois$elm_mdl$Material_Grid$grid,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: A2(
+					_debois$elm_mdl$Material_Grid$cell,
+					{
+						ctor: '::',
+						_0: A2(_debois$elm_mdl$Material_Grid$size, _debois$elm_mdl$Material_Grid$All, 12),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$style(
+									{
+										ctor: '::',
+										_0: {ctor: '_Tuple2', _0: 'width', _1: '473px'},
+										_1: {
+											ctor: '::',
+											_0: {ctor: '_Tuple2', _0: 'margin', _1: 'auto'},
+											_1: {ctor: '[]'}
+										}
+									}),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A5(
+									_debois$elm_mdl$Material_Textfield$render,
+									_user$project$Main$Mdl,
+									{
+										ctor: '::',
+										_0: 0,
+										_1: {ctor: '[]'}
+									},
+									model.mdl,
+									{
+										ctor: '::',
+										_0: _debois$elm_mdl$Material_Textfield$label('Enter racer name:'),
+										_1: {
+											ctor: '::',
+											_0: _debois$elm_mdl$Material_Textfield$floatingLabel,
+											_1: {
+												ctor: '::',
+												_0: _debois$elm_mdl$Material_Textfield$text_,
+												_1: {
+													ctor: '::',
+													_0: _debois$elm_mdl$Material_Options$onInput(_user$project$Main$UpdateInput),
+													_1: {
+														ctor: '::',
+														_0: _debois$elm_mdl$Material_Options$onClick(_user$project$Main$DeleteInput),
+														_1: {
+															ctor: '::',
+															_0: _debois$elm_mdl$Material_Textfield$value(model.input),
+															_1: {ctor: '[]'}
+														}
+													}
+												}
+											}
+										}
+									},
+									{ctor: '[]'}),
+								_1: {
+									ctor: '::',
+									_0: A5(
+										_debois$elm_mdl$Material_Button$render,
+										_user$project$Main$Mdl,
+										{
+											ctor: '::',
+											_0: 1,
+											_1: {ctor: '[]'}
+										},
+										model.mdl,
+										{
+											ctor: '::',
+											_0: _debois$elm_mdl$Material_Button$raised,
+											_1: {
+												ctor: '::',
+												_0: _debois$elm_mdl$Material_Button$colored,
+												_1: {
+													ctor: '::',
+													_0: _debois$elm_mdl$Material_Button$ripple,
+													_1: {
+														ctor: '::',
+														_0: _debois$elm_mdl$Material_Options$onClick(
+															_user$project$Main$Add(
+																_user$project$Racer$initName(model.input))),
+														_1: {
+															ctor: '::',
+															_0: A2(_debois$elm_mdl$Material_Options$css, 'margin', '5px 5px'),
+															_1: {ctor: '[]'}
+														}
+													}
+												}
+											}
+										},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('ADD'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
+										ctor: '::',
+										_0: A5(
+											_debois$elm_mdl$Material_Button$render,
+											_user$project$Main$Mdl,
+											{
+												ctor: '::',
+												_0: 2,
+												_1: {ctor: '[]'}
+											},
+											model.mdl,
+											{
+												ctor: '::',
+												_0: _debois$elm_mdl$Material_Button$raised,
+												_1: {
+													ctor: '::',
+													_0: _debois$elm_mdl$Material_Button$colored,
+													_1: {
+														ctor: '::',
+														_0: _debois$elm_mdl$Material_Button$ripple,
+														_1: {
+															ctor: '::',
+															_0: _debois$elm_mdl$Material_Options$onClick(_user$project$Main$StartAllTimer),
+															_1: {
+																ctor: '::',
+																_0: A2(_debois$elm_mdl$Material_Options$css, 'margin', '5px 5px'),
+																_1: {ctor: '[]'}
+															}
+														}
+													}
+												}
+											},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('RACE'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}
+								}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{ctor: '[]'},
+								A2(_elm_lang$core$List$indexedMap, _user$project$Main$viewRacer, model.racers)),
+							_1: {ctor: '[]'}
+						}
+					}),
+				_1: {ctor: '[]'}
+			}));
+};
+var _user$project$Main$main = _elm_lang$html$Html$program(
+	{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();

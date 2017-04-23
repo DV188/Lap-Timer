@@ -1,0 +1,20 @@
+var _user$project$Timer$start = function (timer) {
+	return _elm_lang$core$Native_Utils.update(
+		timer,
+		{counting: !timer.counting});
+};
+var _user$project$Timer$zero = function (timer) {
+	return _elm_lang$core$Native_Utils.update(
+		timer,
+		{time: 0, counting: false});
+};
+var _user$project$Timer$step = function (timer) {
+	return _elm_lang$core$Native_Utils.eq(timer.counting, true) ? _elm_lang$core$Native_Utils.update(
+		timer,
+		{time: timer.time + (1.0e-2 * _elm_lang$core$Time$second)}) : timer;
+};
+var _user$project$Timer$init = {time: 0, counting: false};
+var _user$project$Timer$Timer = F2(
+	function (a, b) {
+		return {time: a, counting: b};
+	});
