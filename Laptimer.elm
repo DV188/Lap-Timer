@@ -9,13 +9,12 @@ import Timer exposing (Timer)
 -- CSS boilerplate using the elm-mdl library
 import Material
 import Material.Button as Button
+import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Material.Icon as Icon
 import Material.Options as Options exposing (css)
 import Material.Scheme
 import Material.Textfield as Textfield
 import Material.Typography as Typo
-
-import Material.Grid exposing (grid, cell, size, offset, Device(..))
 
 main : Program Never Model Msg
 main =
@@ -138,33 +137,10 @@ subscriptions model =
 
 -- VIEW
 
--- top : (Html a)
--- top =
---   grid []
---     [ cell [ size All 4, css "border-style" "solid" ]
---         [ Html.h4 [] [text "size 4"]
---         ]
---     , cell [ size All 2, css "border-style" "solid" ]
---         [ Html.h4 [] [text "size 2"]
---         ]
---     , cell [ offset All 2, size All 4, css "border-style" "solid" ]
---         [ Html.h4 [] [text "size 4"]
---         , p [] [text "This cell is offset by 2"]
---         ]
---     , cell [ size All 6, css "border-style" "solid" ]
---         [ Html.h4 [] [text "size 6"]
---         ]
---     , cell [ size Tablet 6, size Desktop 12, size Phone 2, css "border-style" "solid" ]
---         [ Html.h4 [] [text "size 6"]
---         , p [] [text "Size varies with device"]
---         ]
---     ]
---         |> Material.Scheme.top
-
 view : Model -> Html Msg
 view model =
     grid []
-        [ cell [size All 12]
+        ( cell [size All 12]
             [ div [style [("width", "473px"), ("margin", "auto")]]
                 [ Textfield.render Mdl [0] model.mdl
                     [ Textfield.label "Enter racer name:"
@@ -192,12 +168,12 @@ view model =
                     ]
                     [text "RACE"]
                 ]
-            , div [] (List.indexedMap viewRacer model.racers)
             ]
-        ]
+            :: (List.indexedMap viewRacer model.racers)
+        )
             |> Material.Scheme.top
 
-viewRacer : Int -> Racer -> Html Msg
+viewRacer : Int -> Racer -> Material.Grid.Cell Msg
 viewRacer racerIndex racer =
     let
         buttonRaised index msg label =
@@ -212,7 +188,7 @@ viewRacer racerIndex racer =
         textStyled item =
             Options.styled p [Typo.button , Typo.left] [item]
     in
-        div [] 
+        cell [size All 4]
             [ Textfield.render Mdl [0] Material.model
                 [ Textfield.text_
                 , Options.onInput (NameRacer racerIndex)
